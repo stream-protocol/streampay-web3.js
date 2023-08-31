@@ -21,48 +21,55 @@ To create a StreamPayments application using JavaScript for the Solana blockchai
    ```
 
 5. **Write Your StreamPayments Code:**
+   
+Private keys should never be hard-coded into source code!
+
+Instead, use use environment variables or a secure configuration management solution to handle private keys and other sensitive information. Load private keys from environment variables. Remember to replace the placeholders with actual private key values and to handle these keys securely:
+
    Create a JavaScript file, e.g., `streamPayments.js`, and add the following code to create a basic StreamPayments application:
 
    ```javascript
    const { Connection, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } = require('@solana/web3.js');
 
-   async function createStreamPayments() {
-       // Connect to the Solana network
-       const connection = new Connection('https://api.devnet.solana.com', 'recent');
+   const { Connection, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } = require('@solana/web3.js');
 
-       // Replace with your own wallet's private key
-       const payerPrivateKey = Uint8Array.from([/* Private key bytes go here */]);
-       const payerKeypair = Keypair.fromSecretKey(payerPrivateKey);
+async function createStreamPayments() {
+    // Connect to the Solana network (mainnet)
+    const connection = new Connection('https://api.mainnet-beta.solana.com', 'recent');
 
-       // Create a new recipient account
-       const recipientKeypair = Keypair.generate();
+    // Load your wallet's private key from an environment variable
+    const payerPrivateKey = process.env.PAYER_PRIVATE_KEY; // Replace with your actual environment variable name
+    const payerKeypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(payerPrivateKey)));
 
-       // Construct a transaction to create the recipient account
-       const transaction = new Transaction().add(
-           SystemProgram.createAccount({
-               fromPubkey: payerKeypair.publicKey,
-               newAccountPubkey: recipientKeypair.publicKey,
-               lamports: 1000000, // Initial funding amount
-               space: 1024,
-               programId: SystemProgram.programId,
-           })
-       );
+    // Create a new recipient account
+    const recipientKeypair = Keypair.generate();
 
-       // Sign and send the transaction
-       await sendAndConfirmTransaction(connection, transaction, [payerKeypair, recipientKeypair]);
+    // Construct a transaction to create the recipient account
+    const transaction = new Transaction().add(
+        SystemProgram.createAccount({
+            fromPubkey: payerKeypair.publicKey,
+            newAccountPubkey: recipientKeypair.publicKey,
+            lamports: 1000000, // Initial funding amount
+            space: 1024,
+            programId: SystemProgram.programId,
+        })
+    );
 
-       console.log(`Recipient account created: ${recipientKeypair.publicKey.toBase58()}`);
-   }
+    // Sign and send the transaction
+    await sendAndConfirmTransaction(connection, transaction, [payerKeypair, recipientKeypair]);
 
-   createStreamPayments().catch(console.error);
-   ```
+    console.log(`Recipient account created: ${recipientKeypair.publicKey.toBase58()}`);
+}
 
-   Replace `'https://api.devnet.solana.com'` with the appropriate Solana network URL.
+createStreamPayments().catch(console.error);
 
-6. **Run Your Application:**
-   Run your StreamPayments application using Node.js:
+
+   Replace `'https://api.devnet.solana.com'` with the appropriate Solana testnet or mainnet 'https://api.mainnet-beta.solana.com' URL.
+
+1. **Run Application:**
+   Run StreamPayments.js application using Node.js:
    ```bash
    node streamPayments.js
    ```
 
-Please note that this is a basic example to demonstrate the concept of creating a StreamPayments application on Solana. In a real-world scenario, you would need to handle additional complexities such as payment schedules, handling payment streams, and managea security aspects carefully. Additionally, handling private keys in code as shown in this example is not secure; you should use appropriate key management practices in a production environment.
+Please note that this is a basic example to demonstrate the concept of creating a StreamPayments application on Solana. In a real-world scenario, you would need to handle additional complexities such as payment schedules, handling payment streams, and manage security aspects carefully. Additionally, handling private keys in code as shown in this example is not secure; you should use appropriate key management practices in a production environment.
